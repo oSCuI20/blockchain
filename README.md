@@ -31,7 +31,6 @@ python3 index.py -d
 Using curl
 ```
 # Check blockchain
-
 curl http://localhost:8000/chain
 
 # New transaction
