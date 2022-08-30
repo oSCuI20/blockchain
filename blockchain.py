@@ -20,8 +20,9 @@ class blockchain(object):
   cache  = memcache.Client([f'{cfg.memcached["host"]}:{cfg.memcached["port"]}'])
   memkey = 'blockchain'
 
-  diff  = '42'
-  chain = [{
+  reward = 0.6
+  diff   = '42'
+  chain  = [{
     'index': 1,
     'timestamp': time(),
     'nonce': hex(getrandbits(32)),
@@ -66,7 +67,7 @@ class blockchain(object):
   def __init__(self):
     result = self.cache.get(self.memkey)
     if result:
-      self.diff = result['diff']
+      self.diff  = result['diff']
       self.chain = result['chain'].copy()
       self.transactions = result['transactions'].copy()
   #__init__
@@ -79,17 +80,21 @@ class blockchain(object):
     })
     self.cache.disconnect_all()
 
-  def run_block(self):
+  def run_block(self, u):
     block = {
       'error': 'There aren\'t block for mining'
     }
 
     if len(self.transactions) > 0:
+      new_block = len(self.chain) + 1
+
+      self.run_transaction(0x00, u, self.reward)
+
       block = {
-        'index': len(self.chain) + 1,
+        'index': new_block,
         'timestamp': time(),
         'nonce': hex(getrandbits(32)),
-        'difficult': self.get_diff(len(self.chain) + 1),
+        'difficult': self.get_diff(new_block),
         'size': sys.getsizeof(self.transactions),
         'transactions': self.transactions.copy(),
         'proof': self.pow(),
